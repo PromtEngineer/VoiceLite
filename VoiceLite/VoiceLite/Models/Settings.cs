@@ -32,6 +32,12 @@ namespace VoiceLite.Models
         Accuracy        // Best transcription quality (beam_size=5, minimal optimizations) - Slower but more accurate
     }
 
+    public enum TranscriptionEngine
+    {
+        Whisper,        // OpenAI Whisper (whisper.cpp) - CPU-optimized, universal compatibility
+        Parakeet        // NVIDIA Parakeet TDT v3 - GPU-accelerated, Pro feature only
+    }
+
     public class WhisperPresetConfig
     {
         public int BeamSize { get; set; }
@@ -226,6 +232,20 @@ namespace VoiceLite.Models
         // License Management
         public string? LicenseKey { get; set; } = null; // Pro license key
         public bool IsProLicense { get; set; } = false; // True if Pro license is activated
+
+        // Transcription Engine Selection (v1.3.0 - Parakeet support)
+        private TranscriptionEngine _preferredEngine = TranscriptionEngine.Whisper;
+        public TranscriptionEngine PreferredEngine
+        {
+            get => _preferredEngine;
+            set => _preferredEngine = Enum.IsDefined(typeof(TranscriptionEngine), value) ? value : TranscriptionEngine.Whisper;
+        }
+
+        // Auto-select best engine based on hardware (GPU detection)
+        public bool AutoSelectEngine { get; set; } = true;
+
+        // Fallback to Whisper if Parakeet fails
+        public bool EnableEngineFallback { get; set} = true;
 
         // Performance Settings
         // CRITICAL: Always capped at 4 threads to prevent CPU thrashing (see v1.1.2 performance fix)

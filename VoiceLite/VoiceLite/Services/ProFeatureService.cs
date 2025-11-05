@@ -104,6 +104,35 @@ namespace VoiceLite.Services
             ? "Pro tier unlocked! You have access to all 5 AI models and future Pro features."
             : "Free tier includes Base model (85-90% accuracy). Upgrade to Pro for all 5 models and up to 98% accuracy.";
 
+        /// <summary>
+        /// Parakeet engine access - Pro feature + NVIDIA GPU required
+        /// </summary>
+        public bool CanUseParakeet => IsProUser;
+
+        /// <summary>
+        /// Controls visibility of Parakeet engine option in Settings.
+        /// Only visible if: Pro user + NVIDIA GPU detected
+        /// </summary>
+        public Visibility ParakeetEngineVisibility =>
+            IsProUser && HardwareCapabilityService.HasNvidiaGPU()
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
+        /// <summary>
+        /// Gets the reason why Parakeet is unavailable (for UI messages)
+        /// </summary>
+        /// <returns>Empty string if available, otherwise reason for unavailability</returns>
+        public string GetParakeetUnavailableReason()
+        {
+            if (!IsProUser)
+                return "Parakeet requires VoiceLite Pro ($20 one-time payment).\nUpgrade at voicelite.app to unlock 2-3x faster transcription!";
+
+            if (!HardwareCapabilityService.HasNvidiaGPU())
+                return "Parakeet requires NVIDIA GPU for hardware acceleration.\nNo NVIDIA GPU detected on this system.";
+
+            return string.Empty; // Available
+        }
+
         #region IProFeatureService Methods
 
         /// <summary>
